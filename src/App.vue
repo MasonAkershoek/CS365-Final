@@ -1,29 +1,28 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
+import PixiCanvas from './components/Game.vue'
 </script>
 
 <script>
-  export default {
-    data(){
-      return {
-        petName: ""
-      }
-    },
-    methods: {
+  import { ref, computed } from 'vue'
 
-    },
-    computed: {
+  // reactive properties
+  const name = ref("Mason");
+  const count = ref(0);
 
-    },
-    mounted(){
+  // computed properties
+  const doubleCount = computed(() => count.value * 2);
 
-    }
+  // methods
+  function increment(){
+    count.value++;
   }
 </script>
 
 <template>
   <div>
     <h1>Mason</h1>
+    <PixiCanvas />
   </div>
 </template>
 
