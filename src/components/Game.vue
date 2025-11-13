@@ -3,38 +3,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, defineExpose } from 'vue'
 import { Application, Graphics } from 'pixi.js'
 
 const pixiContainer = ref(null)
-let app
+const app = ref(null)
 
 onMounted( async() => {
   // Use the modular Application class
-  app = new Application()
-  await app.init({
+  const pixiapp = new Application()
+  await pixiapp.init({
     width: 480,
     height: 270,
     backgroundColor: 0x1e1e1e,
     antialias: true,
   })
 
-  pixiContainer.value.appendChild(app.canvas)
+  pixiContainer.value.appendChild(pixiapp.canvas)
+  app.value = pixiapp
 
-  // Example: spinning square
-  const square = new Graphics()
-    .rect(-25, -25, 50, 50)
-    .fill(0xff6600)
-
-  square.x = app.renderer.width / 2
-  square.y = app.renderer.height / 2
-  app.stage.addChild(square)
-
-  app.ticker.add(() => {
-    square.rotation += 0.02
-  })
 })
-
+defineExpose({ pixiContainer, app })
 onBeforeUnmount(() => {
   app?.destroy(true, true)
 })
