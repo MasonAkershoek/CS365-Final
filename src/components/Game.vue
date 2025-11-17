@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, defineExpose } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Application, Graphics } from 'pixi.js'
 
 const pixiContainer = ref(null)
@@ -14,7 +14,7 @@ onMounted( async() => {
   const pixiapp = new Application()
   await pixiapp.init({
     width: 480,
-    height: 270,
+    height: 480,
     backgroundColor: 0x1e1e1e,
     antialias: true,
   })

@@ -5,11 +5,13 @@ import PixiCanvas from './components/Game.vue'
 <script>
   import { ref, computed } from 'vue'
   import { Application, Graphics } from 'pixi.js'
+  import { Character } from './character';
 
   // reactive properties
   const name = ref("Mason");
   const count = ref(0);
   const pixiRef = ref();
+  const character = ref();
 
   // computed properties
   const doubleCount = computed(() => count.value * 2);
@@ -20,17 +22,19 @@ import PixiCanvas from './components/Game.vue'
   }
 
   function makeSquare(){// Example: spinning square
-  const square = new Graphics()
-    .rect(-25, -25, 50, 50)
-    .fill(0xff6600)
+    character.value = new Character("Maosn", pixiRef)
+    console.log("Mason")
+  }
 
-  square.x = pixiRef.value.app.renderer.width / 2
-  square.y = pixiRef.value.app.renderer.height / 2
-  pixiRef.value.app.stage.addChild(square)
+  function moveLeft(){
+    character.value.position.x -= 10
+    character.value.sprite.scale.x = 1
+  }
 
-  pixiRef.value.app.ticker.add(() => {
-    square.rotation += 0.02
-  })}
+  function moveRight(){
+    character.value.position.x += 10
+    character.value.sprite.scale.x = -1
+  }
 
 </script>
 
@@ -39,6 +43,8 @@ import PixiCanvas from './components/Game.vue'
     <h1>Mason</h1>
     <PixiCanvas ref="pixiRef" />
     <button @click="makeSquare">Make Square</button>
+    <button @click="moveLeft">Move Left</button>
+    <button @click="moveRight">Move Right</button>
   </div>
 </template>
 

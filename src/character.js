@@ -7,16 +7,20 @@
 //   |   |- ( waling<frame#>.png )
 //   |- etc...
 
-function getImg(characterType){
+import { Application,
+  Graphics,
+  Text,
+  TextStyle,
+  Assets,
+  Sprite } from 'pixi.js'
 
-}
+  import glorbpng from "./assets/Glorb.png"
 
 export class Character {
-    constructor(characterType, newName){
-        this.Img = getImg(characterType);
+    constructor(newName, pixiRef){
         this.position = {
             x: 0,
-            y: 0,
+            y: 250,
             direction: 0,
         };
         this.states = {
@@ -29,14 +33,21 @@ export class Character {
         };
         this.state = 0;
         this.name = newName;
-        this. stats = {
-            hunger: 100,
-            sleep: 100,
-            clean: 100,
-            happy: 100,
-            level: 1,
-        }
         this.mouseIsOver = false;
+
+        this.initTexture().then(() => {
+             pixiRef.value.app.stage.addChild(this.sprite)
+
+        pixiRef.value.app.ticker.add(() => {
+            this.sprite.x = this.position.x
+            this.sprite.y = this.position.y
+        })
+        })
+    }
+
+    async initTexture(){
+        const texture = await Assets.load(glorbpng)
+        this.sprite = new Sprite(texture)
     }
 
     checkMouseHover(){
