@@ -19,10 +19,11 @@ import { Application,
 export class Character {
     constructor(newName, pixiRef){
         this.position = {
-            x: 0,
-            y: 250,
-            direction: 0,
+            x: 240,
+            y: 350,
+            direction: 1,
         };
+        this.speed = 10
         this.states = {
             idle: 0,
             walking: 1,
@@ -37,17 +38,23 @@ export class Character {
 
         this.initTexture().then(() => {
              pixiRef.value.app.stage.addChild(this.sprite)
+             this.sprite.anchor.set(0.5,0.5)
 
         pixiRef.value.app.ticker.add(() => {
             this.sprite.x = this.position.x
             this.sprite.y = this.position.y
+            this.sprite.scale.x = -(this.position.direction)
         })
         })
     }
 
+    move() {
+        this.position.x += this.speed*this.position.direction   
+    }
+
     async initTexture(){
         const texture = await Assets.load(glorbpng)
-        this.sprite = new Sprite(texture)
+        this.sprite = await new Sprite(texture)
     }
 
     checkMouseHover(){

@@ -27,13 +27,13 @@ import PixiCanvas from './components/Game.vue'
   }
 
   function moveLeft(){
-    character.value.position.x -= 10
-    character.value.sprite.scale.x = 1
+    character.value.position.direction = -1
+    character.value.move()
   }
 
   function moveRight(){
-    character.value.position.x += 10
-    character.value.sprite.scale.x = -1
+    character.value.position.direction = 1
+    character.value.move()
   }
 
 </script>
