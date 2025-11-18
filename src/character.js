@@ -37,14 +37,14 @@ export class Character {
         this.mouseIsOver = false;
 
         this.initTexture().then(() => {
-             pixiRef.value.app.stage.addChild(this.sprite)
-             this.sprite.anchor.set(0.5,0.5)
+            pixiRef.value.app.stage.addChild(this.sprite)
+            this.sprite.anchor.set(0.5,0.5)
 
-        pixiRef.value.app.ticker.add(() => {
-            this.sprite.x = this.position.x
-            this.sprite.y = this.position.y
-            this.sprite.scale.x = -(this.position.direction)
-        })
+            pixiRef.value.app.ticker.add(() => {
+                this.sprite.x = this.position.x
+                this.sprite.y = this.position.y
+                this.sprite.scale.x = -(this.position.direction)
+            })
         })
     }
 
@@ -55,10 +55,6 @@ export class Character {
     async initTexture(){
         const texture = await Assets.load(glorbpng)
         this.sprite = await new Sprite(texture)
-    }
-
-    checkMouseHover(){
-        
     }
 
     update(){
