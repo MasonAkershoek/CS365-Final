@@ -26,14 +26,10 @@ import PixiCanvas from './components/Game.vue'
     console.log("Mason")
   }
 
-  function moveLeft(){
-    character.value.position.direction = -1
-    character.value.move()
-  }
-
-  function moveRight(){
-    character.value.position.direction = 1
-    character.value.move()
+  function jump(){
+    if (character.value.states.jump != character.value.state){
+      character.value.startJump();
+    }
   }
 
 </script>
@@ -43,8 +39,7 @@ import PixiCanvas from './components/Game.vue'
     <h1>Mason</h1>
     <PixiCanvas ref="pixiRef" />
     <button @click="makeSquare">Make Square</button>
-    <button @click="moveLeft">Move Left</button>
-    <button @click="moveRight">Move Right</button>
+    <button @click="jump">Jump</button>
   </div>
 </template>
 
