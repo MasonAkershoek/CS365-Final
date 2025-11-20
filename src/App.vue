@@ -1,6 +1,7 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import PixiCanvas from './components/Game.vue'
+import Game from './components/Game.vue'
 </script>
 
 <script>
