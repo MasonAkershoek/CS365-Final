@@ -42,19 +42,15 @@ export class Character {
                 case 0:
                     if (change==1 || change==2){
                         // this.state = this.states.dancing;
-                        console.log("Start Dancing")
                     }else if (change>6 && change<=10){
                         this.state = this.states.walking;
-                        console.log("Start Waling")
                     }
                     break;
                 case 1:
                     if (change==1 || change==2){
                         this.state = this.states.idle
-                        console.log("Start Idle")
                     }else if (change>7 && change<10){
                         this.flip()
-                        console.log("FLip")
                     }
                     break;
                 case 2:
@@ -75,7 +71,6 @@ export class Character {
                 this.sprite.x = this.position.x
                 this.sprite.y = this.position.y
                 this.sprite.scale.x = -(this.position.direction)
-                console.log(this.sprite.width)
             })
             pixiRef.value.app.ticker.add(() => {
                 switch (this.state){
@@ -124,7 +119,7 @@ export class Character {
     }
 
     idle(){
-        console.log("Idle")
+
     }
 
     walking(){

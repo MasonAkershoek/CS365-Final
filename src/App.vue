@@ -27,7 +27,7 @@ import PixiCanvas from './components/Game.vue'
   }
 
   function jump(){
-    if (character.value.states.jump != character.value.state){
+    if (character.value.states.jumping != character.value.state){
       character.value.startJump();
     }
   }
