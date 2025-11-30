@@ -34,23 +34,36 @@
 </script>
 
 <style>
-  
+  #popup{
+    border-radius: 20px;
+    opacity: .96;
+  }
+  label{
+    min-width: 100px;
+  }
+  #close{
+    background-color: dimgrey;
+  }
+  #close:hover{
+    border-color: darkcyan;
+  }
 </style>
 
 <template>
   <dialog id="popup">
     <h3>Welcome to soot sprite tamagachi!</h3>
     <p>Please enter your name and your characters name</p>
-    <form id="info">
-      <label for="playerName">Your name:</label>
-      <input type="text" v-model="playerName" name="playerName" id="playerName">
-      <label for="charName">Character name: </label>
-      <input type="text" v-model="characterName" name="charName" id="charName">
-    </form>
-    <button @click="closePopup">Close</button>
+    <label for="playerName">Your name:</label><br>
+    <input type="text" v-model="playerName" name="playerName" id="playerName">
+    <br><br>
+    <label for="charName">Character name: </label><br>
+    <input type="text" v-model="characterName" name="charName" id="charName">
+    <br>
+    <br>
+    <button id="close" @click="closePopup">Start</button>
   </dialog>
   <div class="gameSection">
-    <h1>Mason</h1>
+    <h1 class="silkscreen-regular">{{ characterName }}</h1>
     <PixiCanvas ref="pixiRef" />
     <button @click="jump">Jump</button>
   </div>
