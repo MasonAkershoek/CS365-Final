@@ -19,25 +19,46 @@ const doubleCount = computed(() => count.value * 2);
   }
 
   function makeSquare(){// Example: spinning square
-  const square = new Graphics()
-    .rect(-25, -25, 50, 50)
-    .fill(0xff6600)
+    character.value = new Character("Maosn", pixiRef)
+    console.log("Mason")
+  }
 
-  square.x = pixiRef.value.app.renderer.width / 2
-  square.y = pixiRef.value.app.renderer.height / 2
-  pixiRef.value.app.stage.addChild(square)
+  function jump(){
+    if (character.value.states.jumping != character.value.state){
+      character.value.startJump();
+    }
+  }
 
-  pixiRef.value.app.ticker.add(() => {
-    square.rotation += 0.02
-  })}
+  window.onload = () => {
+    document.getElementById("popup").showModal();
+  };
 
+  function closePopup(){
+    character.value = new Character(characterName, pixiRef)
+    document.getElementById("popup").close()
+  }
 </script>
 
+<style>
+  
+</style>
+
 <template>
-  <div>
+  <dialog id="popup">
+    <h3>Welcome to soot sprite tamagachi!</h3>
+    <p>Please enter your name and your characters name</p>
+    <form id="info">
+      <label for="playerName">Your name:</label>
+      <input type="text" v-model="playerName" name="playerName" id="playerName">
+      <label for="charName">Character name: </label>
+      <input type="text" v-model="characterName" name="charName" id="charName">
+    </form>
+    <button @click="closePopup">Close</button>
+  </dialog>
+  <div class="gameSection">
     <h1>Mason</h1>
     <PixiCanvas ref="pixiRef" />
-    <button @click="makeSquare">Make Square</button>
+    <button @click="jump">Jump</button>
   </div>
 </template>
 
