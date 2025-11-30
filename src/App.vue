@@ -1,8 +1,5 @@
 <script setup>
-import PixiCanvas from './components/Game.vue'
-</script>
-
-<script>
+  import PixiCanvas from './components/Game.vue'
   import { ref, computed } from 'vue'
   import { Application, Graphics } from 'pixi.js'
   import { Character } from './character';
@@ -12,14 +9,8 @@ import PixiCanvas from './components/Game.vue'
   const count = ref(0);
   const pixiRef = ref();
   const character = ref();
-
-  // computed properties
-  const doubleCount = computed(() => count.value * 2);
-
-  // methods
-  function increment(){
-    count.value++;
-  }
+  const playerName = ref();
+  const characterName = ref();
 
   function makeSquare(){// Example: spinning square
     character.value = new Character("Maosn", pixiRef)
@@ -32,13 +23,35 @@ import PixiCanvas from './components/Game.vue'
     }
   }
 
+  window.onload = () => {
+    document.getElementById("popup").showModal();
+  };
+
+  function closePopup(){
+    character.value = new Character(characterName, pixiRef)
+    document.getElementById("popup").close()
+  }
 </script>
 
+<style>
+  
+</style>
+
 <template>
-  <div>
+  <dialog id="popup">
+    <h3>Welcome to soot sprite tamagachi!</h3>
+    <p>Please enter your name and your characters name</p>
+    <form id="info">
+      <label for="playerName">Your name:</label>
+      <input type="text" v-model="playerName" name="playerName" id="playerName">
+      <label for="charName">Character name: </label>
+      <input type="text" v-model="characterName" name="charName" id="charName">
+    </form>
+    <button @click="closePopup">Close</button>
+  </dialog>
+  <div class="gameSection">
     <h1>Mason</h1>
     <PixiCanvas ref="pixiRef" />
-    <button @click="makeSquare">Make Square</button>
     <button @click="jump">Jump</button>
   </div>
 </template>

@@ -54,7 +54,7 @@ export class Character {
         // Character movement and location data
         this.position = {
             x: 240,
-            y: 350,
+            y: 290,
             verticalVelocity: 0,
             direction: 1,
         };
@@ -185,8 +185,8 @@ export class Character {
         if (this.position.verticalVelocity < 5){
             this.position.verticalVelocity += this.gravity*delta.deltaTime
         }
-        if (this.position.y >= 350){
-            this.position.y = 350
+        if (this.position.y >= 300){
+            this.position.y = 300
             this.state = this.states.idle
             this.sprite.play()
             this.stateHasChanged = true
@@ -222,7 +222,7 @@ export class Character {
     move(delta) {
         if (this.position.x-(this.sprite.width/2)<0){
             this.flip();
-        }else if (this.position.x+(this.sprite.width/2)>480){
+        }else if (this.position.x+(this.sprite.width/2)>352){
             this.flip();
         }
         this.position.x += (this.speed*(-this.position.direction))*delta.deltaTime // This line may need changes with new textures
