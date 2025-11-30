@@ -7,6 +7,13 @@
 //   |   |- ( waling<frame#>.png )
 //   |- etc...
 
+// This code is very bad and was quickly thrown togeather to produce a working product to demonstrate that i know how to make this better
+// I will explain how i would do it. Firstly each state would be a seprate object that would implement the structure of a finite state mashine
+// having each state as a seprate object would cut down on reused code and make it so only one function call would need to be made on the current state object
+// This would also cut down on if statements because all the logic needed to determine the state would be stored in the object itself.
+// Kinda a weird ramble but just wanted to demonstrate that i infact did learn something from sarkala and CS322 - Mason 
+
+// Module imports
 import { Application,
   Graphics,
   Text,
@@ -16,16 +23,35 @@ import { Application,
   Sprite, 
   AnimatedSprite} from 'pixi.js'
 
-  import idle1 from "./assets/character/idle/idle-1.png"
-  import idle2 from "./assets/character/idle/idle-2.png"
-  import walk1 from "./assets/character/walk/walk-1.png"
-  import walk2 from "./assets/character/walk/walk-2.png"
-  import dance1 from "./assets/character/dance/dance-1.png"
-  import dance2 from "./assets/character/dance/dance-2.png"
-  import sleep from "./assets/character/sleep/sleep-1.png"
+  // Asset imports 
+  const idelFrames = import.meta.glob("./assets/character/idle/*.png", {eager: true})
+  const walkingFrames = import.meta.glob("./assets/character/walk/*.png", {eager: true})
+  const dancingFrames = import.meta.glob("./assets/character/dance/*.png", {eager: true})
+//   const sleepingFrames = import.meta.glob("./assets/character/sleep/")
+//   const sickFrames = import.meta.glob("./assets/character/sick/")
+//   const hungryFrames = import.meta.glob("./assets/character/hungry/")
 
+// Load in all the textures
+const walking = await framesToArray(walkingFrames)
+const idle = await framesToArray(idelFrames)
+const dancing = await framesToArray(dancingFrames)
+
+
+async function framesToArray(framesObject){
+    let x = Object.entries(framesObject)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, mod]) => mod.default);
+    x.forEach( async (value, index) => {
+        x[index] = await Assets.load(value);
+    })
+    return x;
+}
+
+// Character class
 export class Character {
     constructor(newName, pixiRef){
+
+        // Character movement and location data
         this.position = {
             x: 240,
             y: 350,
@@ -35,7 +61,11 @@ export class Character {
         this.speed = 1
         this.jumpForce = -10
         this.gravity = .5
-        this.ticker = new Ticker();
+
+        // Texture data
+        this.Textures = {}
+
+        // Character State data
         this.states = {
             idle: 0,
             walking: 1,
@@ -43,29 +73,42 @@ export class Character {
             sleeping: 3,
             jumping: 4
         };
+        this.stateHasChanged = false
         this.state = 0;
+
+        // misc
         this.name = newName;
         this.mouseIsOver = false;
 
+        // Change of state logic call back
         setInterval(() => {
             const change = Math.round(Math.random()*10)
             switch (this.state){
                 case 0:
                     if (change==1 || change==2){
-                        // this.state = this.states.dancing;
+                        this.state = this.states.dancing;
+                        this.stateHasChanged = true
                     }else if (change>6 && change<=10){
                         this.state = this.states.walking;
+                        this.stateHasChanged = true
                     }
                     break;
                 case 1:
                     if (change==1 || change==2){
                         this.state = this.states.idle
+                        this.stateHasChanged = true
                     }else if (change>7 && change<10){
                         this.flip()
                     }
                     break;
                 case 2:
-                    break;
+                    if (change > 5){
+                        this.state = this.states.idle
+                        this.stateHasChanged = true
+                    }else if (change == 1 || change == 2){
+                        this.state = this.states.walking
+                        this.stateHasChanged = true
+                    }
                 case 3:
                     break;
                 case 4:
@@ -73,8 +116,12 @@ export class Character {
 
             }
         },2000)
-
+        
+        // Texture setup
         this.initTexture().then(() => {
+            this.sprite = new AnimatedSprite(this.Textures.idle)
+            this.sprite.play()
+            this.sprite.animationSpeed = .05
             pixiRef.value.app.stage.addChild(this.sprite)
             this.sprite.anchor.set(0.5,0.5)
 
@@ -83,44 +130,70 @@ export class Character {
                 this.sprite.y = this.position.y
                 this.sprite.scale.x = -(this.position.direction)
             })
-            pixiRef.value.app.ticker.add(() => {
+            pixiRef.value.app.ticker.add((delta) => {
                 switch (this.state){
                     case 0:
-                        this.idle()
+                        if (this.stateHasChanged){
+                            this.stateHasChanged = false;
+                            this.sprite.textures = this.Textures.idle
+                            this.sprite.play()
+                        }
+                        this.idle(delta)
                         break;
                     case 1:
-                        this.walking()
+                        if (this.stateHasChanged){
+                            this.stateHasChanged = false;
+                            this.sprite.textures = this.Textures.walking
+                            this.sprite.play()
+                        }
+                        this.walking(delta)
                         break;
                     case 2:
-                        this.dancing()
+                        if (this.stateHasChanged){
+                            this.stateHasChanged = false;
+                            this.sprite.textures = this.Textures.dancing
+                            this.sprite.play()
+                        }
+                        this.dancing(delta)
                         break;
                     case 3:
-                        this.sleeping()
+                        if (this.stateHasChanged){
+                            this.stateHasChanged = false;
+                            this.sprite.textures = this.Textures.sleeping
+                            this.sprite.play()
+                        }
+                        this.sleeping(delta)
                         break;
                     case 4:
-                        this.jump()
+                        this.jump(delta)
                         break;
                 }
             })
         })
     }
 
+    // This code sets the character up to begin the jumping animation
     startJump(){
         this.position.verticalVelocity = this.jumpForce
         this.state = this.states.jumping
+        this.sprite.stop();
     }
 
-    jump(){
-        this.position.y += this.position.verticalVelocity*this.ticker.deltaTime
+    // This function handles the jumping and falling logic
+    jump(delta){
+        this.position.y += this.position.verticalVelocity*delta.deltaTime
         if (this.position.verticalVelocity < 5){
-            this.position.verticalVelocity += this.gravity*this.ticker.deltaTime
+            this.position.verticalVelocity += this.gravity*delta.deltaTime
         }
         if (this.position.y >= 350){
             this.position.y = 350
             this.state = this.states.idle
+            this.sprite.play()
+            this.stateHasChanged = true
         }
     }
 
+    // This function flips the character sprite over the y axsis
     flip(){
         if (this.position.direction > 0){
             this.position.direction = -1
@@ -133,8 +206,8 @@ export class Character {
 
     }
 
-    walking(){
-        this.move()
+    walking(delta){
+        this.move(delta)
     }
 
     dancing(){
@@ -145,33 +218,21 @@ export class Character {
 
     }
 
-    move() {
+    // This function handles the movment logic using delta time to ensure cross platform movment consistancy
+    move(delta) {
         if (this.position.x-(this.sprite.width/2)<0){
             this.flip();
         }else if (this.position.x+(this.sprite.width/2)>480){
             this.flip();
         }
-        this.position.x += (this.speed*this.position.direction)*this.ticker.deltaTime
+        this.position.x += (this.speed*(-this.position.direction))*delta.deltaTime // This line may need changes with new textures
     }
 
+    // This function loads in all the textures into the textures object to be loaded into the animated sprite object
     async initTexture(){
-         this.Textures.walking = await Assets.load([
-            walk1,
-            walk2
-        ])
-        this.Textures.idle = await Assets.load([
-            idle1,
-            idle2
-        ])
-        this.Textures.dancing = await Assets.load([
-            dance1,
-            dance2
-        ])
-        this.Textures.sleeping = await Assets.load([
-            sleep
-        ])
-        this.sprite = new AnimatedSprite(this.Textures.idle)
-        this.sprite.play()
-
+         this.Textures.walking = walking
+        this.Textures.idle = idle
+        this.Textures.dancing = dancing
+        // this.Textures.sleeping = await framesToArray()
     }
 }
