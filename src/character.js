@@ -11,10 +11,18 @@ import { Application,
   Graphics,
   Text,
   TextStyle,
+  Ticker,
   Assets,
-  Sprite } from 'pixi.js'
+  Sprite, 
+  AnimatedSprite} from 'pixi.js'
 
-  import glorbpng from "./assets/Glorb.png"
+  import idle1 from "./assets/character/idle/idle-1.png"
+  import idle2 from "./assets/character/idle/idle-2.png"
+  import walk1 from "./assets/character/walk/walk-1.png"
+  import walk2 from "./assets/character/walk/walk-2.png"
+  import dance1 from "./assets/character/dance/dance-1.png"
+  import dance2 from "./assets/character/dance/dance-2.png"
+  import sleep from "./assets/character/sleep/sleep-1.png"
 
 export class Character {
     constructor(newName, pixiRef){
@@ -24,7 +32,10 @@ export class Character {
             verticalVelocity: 0,
             direction: 1,
         };
-        this.speed = .3
+        this.speed = 1
+        this.jumpForce = -10
+        this.gravity = .5
+        this.ticker = new Ticker();
         this.states = {
             idle: 0,
             walking: 1,
@@ -95,14 +106,14 @@ export class Character {
     }
 
     startJump(){
-        this.position.verticalVelocity = -5
+        this.position.verticalVelocity = this.jumpForce
         this.state = this.states.jumping
     }
 
     jump(){
-        this.position.y += this.position.verticalVelocity
+        this.position.y += this.position.verticalVelocity*this.ticker.deltaTime
         if (this.position.verticalVelocity < 5){
-            this.position.verticalVelocity += .05
+            this.position.verticalVelocity += this.gravity*this.ticker.deltaTime
         }
         if (this.position.y >= 350){
             this.position.y = 350
@@ -140,11 +151,27 @@ export class Character {
         }else if (this.position.x+(this.sprite.width/2)>480){
             this.flip();
         }
-        this.position.x += this.speed*this.position.direction   
+        this.position.x += (this.speed*this.position.direction)*this.ticker.deltaTime
     }
 
     async initTexture(){
-        const texture = await Assets.load(glorbpng)
-        this.sprite = await new Sprite(texture)
+         this.Textures.walking = await Assets.load([
+            walk1,
+            walk2
+        ])
+        this.Textures.idle = await Assets.load([
+            idle1,
+            idle2
+        ])
+        this.Textures.dancing = await Assets.load([
+            dance1,
+            dance2
+        ])
+        this.Textures.sleeping = await Assets.load([
+            sleep
+        ])
+        this.sprite = new AnimatedSprite(this.Textures.idle)
+        this.sprite.play()
+
     }
 }
