@@ -27,6 +27,7 @@ import { Application,
   const idelFrames = import.meta.glob("./assets/character/idle/*.png", {eager: true})
   const walkingFrames = import.meta.glob("./assets/character/walk/*.png", {eager: true})
   const dancingFrames = import.meta.glob("./assets/character/dance/*.png", {eager: true})
+  const starFrames = import.meta.glob("./assets/stars/*.png", {eager: true})
 //   const sleepingFrames = import.meta.glob("./assets/character/sleep/")
 //   const sickFrames = import.meta.glob("./assets/character/sick/")
 //   const hungryFrames = import.meta.glob("./assets/character/hungry/")
@@ -35,6 +36,7 @@ import { Application,
 const walking = await framesToArray(walkingFrames)
 const idle = await framesToArray(idelFrames)
 const dancing = await framesToArray(dancingFrames)
+const stars = await framesToArray(starFrames)
 
 
 async function framesToArray(framesObject){
@@ -51,6 +53,7 @@ async function framesToArray(framesObject){
 export class Character {
     constructor(newName, pixiRef){
 
+        this.pixiRef = pixiRef
         // Character movement and location data
         this.position = {
             x: 240,
@@ -79,6 +82,7 @@ export class Character {
         // misc
         this.name = newName;
         this.mouseIsOver = false;
+        this.update = this.update.bind(this);
 
         // Change of state logic call back
         setInterval(() => {
@@ -116,7 +120,7 @@ export class Character {
 
             }
         },2000)
-        
+
         // Texture setup
         this.initTexture().then(() => {
             this.sprite = new AnimatedSprite(this.Textures.idle)
@@ -124,51 +128,6 @@ export class Character {
             this.sprite.animationSpeed = .05
             pixiRef.value.app.stage.addChild(this.sprite)
             this.sprite.anchor.set(0.5,0.5)
-
-            pixiRef.value.app.ticker.add(() => {
-                this.sprite.x = this.position.x
-                this.sprite.y = this.position.y
-                this.sprite.scale.x = -(this.position.direction)
-            })
-            pixiRef.value.app.ticker.add((delta) => {
-                switch (this.state){
-                    case 0:
-                        if (this.stateHasChanged){
-                            this.stateHasChanged = false;
-                            this.sprite.textures = this.Textures.idle
-                            this.sprite.play()
-                        }
-                        this.idle(delta)
-                        break;
-                    case 1:
-                        if (this.stateHasChanged){
-                            this.stateHasChanged = false;
-                            this.sprite.textures = this.Textures.walking
-                            this.sprite.play()
-                        }
-                        this.walking(delta)
-                        break;
-                    case 2:
-                        if (this.stateHasChanged){
-                            this.stateHasChanged = false;
-                            this.sprite.textures = this.Textures.dancing
-                            this.sprite.play()
-                        }
-                        this.dancing(delta)
-                        break;
-                    case 3:
-                        if (this.stateHasChanged){
-                            this.stateHasChanged = false;
-                            this.sprite.textures = this.Textures.sleeping
-                            this.sprite.play()
-                        }
-                        this.sleeping(delta)
-                        break;
-                    case 4:
-                        this.jump(delta)
-                        break;
-                }
-            })
         })
     }
 
@@ -190,6 +149,60 @@ export class Character {
             this.state = this.states.idle
             this.sprite.play()
             this.stateHasChanged = true
+        }
+    }
+
+    remove(pixiRef){
+        pixiRef.value.app.ticker.remove(this.update)
+        pixiRef.value.app.ticker.remove(this.setPos)
+        pixiRef.value.app.stage.removeChild(this.sprite);
+        this.sprite.destroy()
+        delete this;
+    }
+
+    mysetPos() {
+        this.sprite.x = this.position.x
+        this.sprite.y = this.position.y
+        this.sprite.scale.x = -(this.position.direction)   
+    }
+
+    setStates(delta) {
+        switch (this.state){
+            case 0:
+                if (this.stateHasChanged){
+                    this.stateHasChanged = false;
+                    this.sprite.textures = this.Textures.idle
+                    this.sprite.play()
+                }
+                this.idle(delta)
+                break;
+            case 1:
+                if (this.stateHasChanged){
+                    this.stateHasChanged = false;
+                    this.sprite.textures = this.Textures.walking
+                    this.sprite.play()
+                }
+                this.walking(delta)
+                break;
+            case 2:
+                if (this.stateHasChanged){
+                    this.stateHasChanged = false;
+                    this.sprite.textures = this.Textures.dancing
+                    this.sprite.play()
+                }
+                this.dancing()
+                break;
+            case 3:
+                if (this.stateHasChanged){
+                    this.stateHasChanged = false;
+                    this.sprite.textures = this.Textures.sleeping
+                    this.sprite.play()
+                }
+                this.sleeping()
+                break;
+            case 4:
+                this.jump(delta)
+                break;
         }
     }
 
@@ -234,5 +247,46 @@ export class Character {
         this.Textures.idle = idle
         this.Textures.dancing = dancing
         // this.Textures.sleeping = await framesToArray()
+    }
+
+    update(delta){
+        this.mysetPos()
+        this.setStates(delta);
+    }
+}
+
+export class FoodStar {
+    constructor(newX, pixiRef){
+        this.position = {
+            x: newX,
+            y: 0,
+            verticalVelocity: 5,
+        };
+
+        this.sprite = this.GetSprite(pixiRef)
+        pixiRef.value.app.stage.addChild(this.sprite)
+        this.sprite.anchor.set(0.5,0.5)
+    }
+
+    remove(pixiRef){
+        pixiRef.value.app.ticker.remove(this.update)
+        pixiRef.value.app.stage.removeChild(this.sprite);
+        this.sprite.destroy()
+        //delete this;
+    }
+
+    GetSprite(){
+        let spriteSelection = Math.floor(Math.random() * stars.length);
+        return new Sprite(stars[spriteSelection]);
+    }
+
+    update(delta){
+        this.sprite.x = this.position.x
+        this.sprite.y = this.position.y
+        if (this.position.y < 300){
+            this.position.y += this.position.verticalVelocity*delta.deltaTime
+        }else{
+            this.position.y = 300
+        }
     }
 }

@@ -3,10 +3,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { Application, Graphics, Assets, Sprite } from 'pixi.js'
+import { ref, onMounted, onBeforeUnmount, defineEmits } from 'vue'
+import { Application, Assets, Sprite } from 'pixi.js'
 import bg1 from '../assets/bg1.png'
 
+const emit = defineEmits(['ready']);
 const pixiContainer = ref(null)
 const app = ref(null)
 
@@ -31,6 +32,7 @@ onMounted( async() => {
   bg.height = pixiapp.renderer.height
 
   pixiapp.stage.addChild(bg)
+  emit('ready', app.value);
 
 })
 defineExpose({ pixiContainer, app })
