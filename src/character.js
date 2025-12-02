@@ -79,6 +79,11 @@ export class Character {
         this.stateHasChanged = false
         this.state = 0;
 
+        this.status = {
+            hunger: 100,
+            happiness: 100
+        }
+
         // misc
         this.name = newName;
         this.mouseIsOver = false;

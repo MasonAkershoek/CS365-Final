@@ -1,6 +1,6 @@
 <script setup>
   import PixiCanvas from './components/Game.vue'
-  import { ref, onMounted, nextTick } from 'vue'
+  import { ref, onMounted, nextTick, computed } from 'vue'
   import { Character, FoodStar } from './character';
 
   // reactive properties
@@ -32,6 +32,13 @@
       }
     }
   },1000)
+
+  const charIsInit = computed(() => {
+    if (character.value == null){
+      return false
+    }
+    return true
+  })
 
   function testForAABB(object1, object2) {
     if (!object1 || !object2) return false;
@@ -91,6 +98,62 @@
   #close:hover{
     border-color: darkcyan;
   }
+  #status{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+    justify-content: space-evenly;
+    width: 40%;
+    margin: auto;
+  }
+  .statusIndicator{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: solid black 2px;
+    border-radius: 20px;
+    background-color: burlywood;
+    color: black;
+    min-width: 150px;
+    font-size: 20px;
+  }
+  .statusIndicator p {
+    margin: 0px;
+  }
+  #CharHeader{
+    background-color: burlywood;
+    border: solid black;
+    border-radius: 20px;
+    width: fit-content;
+    margin: auto;
+    padding: 10px;
+    color: black;
+  }
+  #buttonBox{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 30%;
+    margin: auto;
+  }
+  .buttoncontainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+  .buttonsprite{
+    background-image: url("./assets/button.png");
+    background-repeat: no-repeat;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0);
+    margin: auto;
+  }
 </style>
 
 <template>
@@ -107,10 +170,27 @@
     <button id="close" @click="closePopup">Start</button>
   </dialog>
   <div class="gameSection">
-    <h1 class="silkscreen-regular">{{ characterName }}</h1>
-
+    <h1 v-if="charIsInit" id="CharHeader" class="silkscreen-regular">{{ characterName }}</h1>
+    <div id="status">
+      <div class="statusIndicator">
+        <label class="silkscreen-regular" for="hunger">hunger</label><br>
+        <p class="silkscreen-regular" id="hunger" v-if="charIsInit">{{ character.status.hunger }}</p>
+      </div>
+      <div class="statusIndicator">
+        <label class="silkscreen-regular" for="happynes">happynes</label><br>
+        <p class="silkscreen-regular" id="happynes" v-if="charIsInit">{{ character.status.happiness }}</p>
+      </div>
+    </div>
     <PixiCanvas @ready="onPixiReady" ref="pixiRef" />
-    <button @click="jump">Jump</button>
-    <button @click="feed">Feed</button>
+    <div id="buttonBox">
+      <div class="buttoncontainer">
+        <button id="butt" class="buttonsprite" @click="jump"></button>
+        <label for="butt">Jump</label>
+      </div>
+      <div class="buttoncontainer">
+        <button id="butt2" class="buttonsprite" @click="feed"></button>
+        <label for="butt2">Feed</label>
+      </div>
+    </div>
   </div>
 </template>

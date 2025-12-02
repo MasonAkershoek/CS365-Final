@@ -36,8 +36,5 @@ onMounted( async() => {
 
 })
 defineExpose({ pixiContainer, app })
-onBeforeUnmount(() => {
-  app?.destroy(true, true)
-})
 </script>
 
