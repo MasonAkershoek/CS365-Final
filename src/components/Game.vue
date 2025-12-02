@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, defineEmits } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Application, Assets, Sprite } from 'pixi.js'
 import bg1 from '../assets/bg1.png'
 

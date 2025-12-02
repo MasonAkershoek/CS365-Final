@@ -1,12 +1,9 @@
 <script setup>
   import PixiCanvas from './components/Game.vue'
-  import { ref, computed, onMounted, nextTick } from 'vue'
-  import { Application, Graphics } from 'pixi.js'
+  import { ref, onMounted, nextTick } from 'vue'
   import { Character, FoodStar } from './character';
 
   // reactive properties
-  const name = ref("Mason");
-  const count = ref(0);
   const pixiRef = ref();
   const character = ref();
   const playerName = ref();
@@ -111,6 +108,7 @@
   </dialog>
   <div class="gameSection">
     <h1 class="silkscreen-regular">{{ characterName }}</h1>
+
     <PixiCanvas @ready="onPixiReady" ref="pixiRef" />
     <button @click="jump">Jump</button>
     <button @click="feed">Feed</button>
