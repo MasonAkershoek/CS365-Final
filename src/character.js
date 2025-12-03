@@ -23,6 +23,8 @@ import { Application,
   Sprite, 
   AnimatedSprite} from 'pixi.js'
 
+import { ref } from 'vue'
+
   // Asset imports 
   const idelFrames = import.meta.glob("./assets/character/idle/*.png", {eager: true})
   const walkingFrames = import.meta.glob("./assets/character/walk/*.png", {eager: true})
@@ -80,8 +82,8 @@ export class Character {
         this.state = 0;
 
         this.status = {
-            hunger: 100,
-            happiness: 100
+            hunger: ref(0),
+            happiness: ref(0)
         }
 
         // misc
@@ -92,6 +94,13 @@ export class Character {
         // Change of state logic call back
         setInterval(() => {
             const change = Math.round(Math.random()*10)
+            if (change == 1){
+                if ((this.status.hunger - 5) < 0){
+                    this.status.hunder = 0;
+                }else{
+                    this.status.hunger -= 5
+                }
+            }
             switch (this.state){
                 case 0:
                     if (change==1 || change==2){

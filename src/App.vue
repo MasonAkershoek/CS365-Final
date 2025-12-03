@@ -2,12 +2,14 @@
   import PixiCanvas from './components/Game.vue'
   import { ref, onMounted, nextTick, computed } from 'vue'
   import { Character, FoodStar } from './character';
+  import { v4 as uuidv4 } from 'uuid';
 
   // reactive properties
   const pixiRef = ref();
   const character = ref();
   const playerName = ref();
   const characterName = ref();
+  const petFact = ref(null);
   let foodSprites = []
 
   function jump(){
@@ -38,6 +40,13 @@
       return false
     }
     return true
+  })
+
+  const getCharHunger = computed(() => {
+    if (character.value != null){
+      return ""
+    }
+    return character.status.hunger
   })
 
   function testForAABB(object1, object2) {
@@ -75,13 +84,46 @@
   function onPixiReady(app) {
     pixiRef.value = { app };
     pixiRef.value.app.ticker.add(globalUpdate);
+    // const aUUID = document.cookie.split("=");
+    // console.log(aUUID)
+    // if (aUUID.length > 1){
+    //   if (aUUID[0] == "uuid"){
+        
+    //   }
+    // }else{
+    //   document.cookie = "uuid=" + uuidv4()
+    //   document.getElementById("popup")?.showModal();
+    // }
     document.getElementById("popup")?.showModal();
   }
 
-  onMounted(async () => {
-    await nextTick(); 
-    document.getElementById("popup")?.showModal();
-  });
+  function getPetFact() {
+  var T = document.getElementById("infoBox");
+  T.style.display = "block";
+
+  fetch('/petFacts.json')
+    .then((response) => {
+      return response.json()
+    })
+    .then((data) => {
+      const facts = data.facts || []
+      if (facts.length === 0) {
+        petFact.value = 'No information available'
+        return
+      }
+      const index = Math.floor(Math.random() * facts.length)
+      petFact.value = facts[index]
+    })
+    .catch((err) => {
+      console.error('Error loading info', err)
+      petFact.value = 'Cannot load info'
+    })
+}
+
+  // onMounted(async () => {
+  //   await nextTick(); 
+  //   document.getElementById("popup")?.showModal();
+  // });
 </script>
 
 <style>
@@ -170,15 +212,15 @@
     <button id="close" @click="closePopup">Start</button>
   </dialog>
   <div class="gameSection">
-    <h1 v-if="charIsInit" id="CharHeader" class="silkscreen-regular">{{ characterName }}</h1>
+    <h1 v-if="charIsInit" id="CharHeader" class="silkscreen-regular">{{ characterName.value }}</h1>
     <div id="status">
       <div class="statusIndicator">
         <label class="silkscreen-regular" for="hunger">hunger</label><br>
-        <p class="silkscreen-regular" id="hunger" v-if="charIsInit">{{ character.status.hunger }}</p>
+        <p class="silkscreen-regular" id="hunger" v-if="charIsInit">{{ getCharHunger() }}</p>
       </div>
       <div class="statusIndicator">
         <label class="silkscreen-regular" for="happynes">happynes</label><br>
-        <p class="silkscreen-regular" id="happynes" v-if="charIsInit">{{ character.status.happiness }}</p>
+        <p class="silkscreen-regular" id="happynes" v-if="charIsInit">{{ character.status.happiness.value }}</p>
       </div>
     </div>
     <PixiCanvas @ready="onPixiReady" ref="pixiRef" />
@@ -191,6 +233,13 @@
         <button id="butt2" class="buttonsprite" @click="feed"></button>
         <label for="butt2">Feed</label>
       </div>
+      <div class="buttoncontainer">
+        <button id="butt3" class="buttonsprite" @click="getPetFact"></button>
+        <label for="butt3"> Info! </label>
+      </div>
+    </div>
+    <div  class="statusIndicator" id="infoBox" style="display:none; font-size: 20px;">
+      <p> {{ petFact }} </p> 
     </div>
   </div>
 </template>
