@@ -14,11 +14,7 @@
 // Kinda a weird ramble but just wanted to demonstrate that i infact did learn something from sarkala and CS322 - Mason 
 
 // Module imports
-import { Application,
-  Graphics,
-  Text,
-  TextStyle,
-  Ticker,
+import { 
   Assets,
   Sprite, 
   AnimatedSprite} from 'pixi.js'
@@ -53,7 +49,7 @@ async function framesToArray(framesObject){
 
 // Character class
 export class Character {
-    constructor(newName, pixiRef){
+    constructor(newName, pixiRef, stats){
 
         this.pixiRef = pixiRef
         // Character movement and location data
@@ -81,10 +77,7 @@ export class Character {
         this.stateHasChanged = false
         this.state = 0;
 
-        this.status = {
-            hunger: ref(0),
-            happiness: ref(0)
-        }
+        this.status = stats
 
         // misc
         this.name = newName;
@@ -163,6 +156,13 @@ export class Character {
             this.state = this.states.idle
             this.sprite.play()
             this.stateHasChanged = true
+        }
+    }
+
+    getFed(){
+        this.status.hunger += 15
+        if (this.status.hunger > 100){
+            this.status.hunger = 100
         }
     }
 

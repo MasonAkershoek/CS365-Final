@@ -1,6 +1,6 @@
 <script setup>
   import PixiCanvas from './components/Game.vue'
-  import { ref, onMounted, nextTick, computed } from 'vue'
+  import { ref, computed, reactive } from 'vue'
   import { Character, FoodStar } from './character';
   import { v4 as uuidv4 } from 'uuid';
 
@@ -9,6 +9,10 @@
   const character = ref();
   const playerName = ref();
   const characterName = ref();
+  const characterStats = reactive({
+    hunger: 100,
+    happieness: 100,
+  })
   const petFact = ref(null);
   let foodSprites = []
 
@@ -19,7 +23,7 @@
   }
 
   function closePopup(){
-    character.value = new Character(characterName, pixiRef)
+    character.value = reactive(new Character(characterName, pixiRef, characterStats))
     document.getElementById("popup").close()
   }
 
@@ -30,6 +34,7 @@
         if (testForAABB(character.value, item)){
           item.remove(pixiRef)
           foodSprites = foodSprites.filter(f => f !== item)
+          character.value.getFed()
         }
       }
     }
@@ -42,12 +47,10 @@
     return true
   })
 
-  const getCharHunger = computed(() => {
-    if (character.value != null){
-      return ""
-    }
-    return character.status.hunger
-  })
+const getCharHunger = computed(() => {
+  if (!character.value) return "—"
+  return character.value.status.hunger
+})
 
   function testForAABB(object1, object2) {
     if (!object1 || !object2) return false;
@@ -81,19 +84,22 @@
     }
   }
 
-  function onPixiReady(app) {
+  async function onPixiReady(app) {
     pixiRef.value = { app };
     pixiRef.value.app.ticker.add(globalUpdate);
-    // const aUUID = document.cookie.split("=");
-    // console.log(aUUID)
-    // if (aUUID.length > 1){
-    //   if (aUUID[0] == "uuid"){
+    const response = await fetch("http://localhost:2003/services/getData")
+    const data = await response.json()
+    console.log(data)
+    const aUUID = document.cookie.split("=");
+    console.log(aUUID)
+    if (aUUID.length > 1){
+      if (aUUID[0] == "uuid"){
         
-    //   }
-    // }else{
-    //   document.cookie = "uuid=" + uuidv4()
-    //   document.getElementById("popup")?.showModal();
-    // }
+      }
+    }else{
+      document.cookie = "uuid=" + uuidv4()
+      document.getElementById("popup")?.showModal();
+    }
     document.getElementById("popup")?.showModal();
   }
 
@@ -212,15 +218,15 @@
     <button id="close" @click="closePopup">Start</button>
   </dialog>
   <div class="gameSection">
-    <h1 v-if="charIsInit" id="CharHeader" class="silkscreen-regular">{{ characterName.value }}</h1>
+    <h1 v-if="charIsInit" id="CharHeader" class="silkscreen-regular">{{ characterName }}</h1>
     <div id="status">
       <div class="statusIndicator">
         <label class="silkscreen-regular" for="hunger">hunger</label><br>
-        <p class="silkscreen-regular" id="hunger" v-if="charIsInit">{{ getCharHunger() }}</p>
+        <p class="silkscreen-regular" id="hunger" v-if="charIsInit">{{ character.status.hunger }}</p>
       </div>
       <div class="statusIndicator">
         <label class="silkscreen-regular" for="happynes">happynes</label><br>
-        <p class="silkscreen-regular" id="happynes" v-if="charIsInit">{{ character.status.happiness.value }}</p>
+        <p class="silkscreen-regular" id="happynes" v-if="charIsInit">{{  }}</p>
       </div>
     </div>
     <PixiCanvas @ready="onPixiReady" ref="pixiRef" />
