@@ -9,10 +9,7 @@
   const character = ref();
   const playerName = ref();
   const characterName = ref();
-  const characterStats = reactive({
-    hunger: 100,
-    happieness: 100,
-  })
+  
   const petFact = ref(null);
   let foodSprites = []
 
@@ -23,6 +20,10 @@
   }
 
   function closePopup(){
+    const characterStats = reactive({
+      hunger: 100,
+      happieness: 100,
+    })
     character.value = reactive(new Character(characterName, pixiRef, characterStats))
     document.getElementById("popup").close()
   }
@@ -46,11 +47,6 @@
     }
     return true
   })
-
-const getCharHunger = computed(() => {
-  if (!character.value) return "—"
-  return character.value.status.hunger
-})
 
   function testForAABB(object1, object2) {
     if (!object1 || !object2) return false;
@@ -84,22 +80,62 @@ const getCharHunger = computed(() => {
     }
   }
 
+  function buildSaveData() {
+    return {
+      userName: playerName.value,
+      charName: characterName.value,
+      hunger: character.value.status.hunger,
+      happieness: character.value.status.happieness
+    }
+  }
+
+  setInterval(() => {
+    if (charIsInit.value){
+      const aUUID = document.cookie.split("=");
+      fetch("http://192.168.0.182:2003/saveUserData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uuid: aUUID[1],
+          spriteData: buildSaveData()
+        })
+      })
+    }
+  },2000)
+
   async function onPixiReady(app) {
     pixiRef.value = { app };
     pixiRef.value.app.ticker.add(globalUpdate);
-    const response = await fetch("http://localhost:2003/services/getData")
-    const data = await response.json()
-    console.log(data)
+    // document.cookie = "uuid=mason"
     const aUUID = document.cookie.split("=");
-    console.log(aUUID)
     if (aUUID.length > 1){
       if (aUUID[0] == "uuid"){
-        
+        const response = await fetch("http://192.168.0.182:2003/getUserData", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uuid: aUUID[1],
+          })
+        })
+        const data = await response.json()
+        if (data.state == undefined){
+          playerName.value = data.userName
+          characterName.value = data.charName
+          const characterStats = reactive({
+            hunger: data.hunger,
+            happieness: data.happieness,
+          })
+          character.value = reactive(new Character(data.charName, pixiRef, characterStats))
+
+        }
       }
-    }else{
-      document.cookie = "uuid=" + uuidv4()
-      document.getElementById("popup")?.showModal();
+      return
     }
+    document.cookie = "uuid=" + uuidv4()
     document.getElementById("popup")?.showModal();
   }
 
